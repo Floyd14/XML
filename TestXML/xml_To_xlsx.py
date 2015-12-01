@@ -2,7 +2,7 @@
 
 ''' xml_To_xlsx Test1. 
 
-This program convert .xml file to .xlsx Excel file.
+This program convert .xml file to .xlsx Excel file..
 
 Dependency: 
     openpyxl
