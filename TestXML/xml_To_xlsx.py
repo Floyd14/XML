@@ -21,15 +21,16 @@ from openpyxl.styles import PatternFill, Border, Side, Alignment, Protection, Fo
 
 
 class Myxml:
+    
     def __init__(self, path="./", xmlfile=None):
         """
         Myxml class
         
+        :param xmlfile: .xml file to be processed
         :type xmlfile: str
         """
         assert type(xmlfile) is StringType, "xmlfile is not a string: xmlfile is %r" % xmlfile
-
-        #self.name = xmlfile
+        # self.name = xmlfile
         self.absolute_path = os.path.join(path, xmlfile)
         self.workbook = Workbook()
         self.active_workbook = self.workbook.active
@@ -58,7 +59,7 @@ class Myxml:
         # for i in range(0, len(self.root)):
         #    for val in root[i]:
         #        row.append(val.text)
-
+        
         # print(rows)    # Uncomment for debug
         # --- Print Elements for Row
         rows = []
@@ -73,8 +74,15 @@ class Myxml:
 
 
 def create_xlsx_from_xlm(Myxml):
-    _path = Myxml.absolute_path[-4]  # senza l'estensione...
-    _filename = './a.xlsx'
+    """
+    Main method: 
+    :type Myxml: Myxml
+    """
+    
+    # recupero path e filename per il salvataggio
+    # lo chiamo nello stesso modo del file .xml
+    path = Myxml.absolute_path[-4]  # senza l'estensione...
+    extension = '.xlsx'
 
     # imposto il nome del foglio
     Myxml.active_workbook.title = Myxml.root.tag
@@ -88,12 +96,12 @@ def create_xlsx_from_xlm(Myxml):
         i += 1
 
 
-    Myxml.workbook.save(filename=_filename)
+    Myxml.workbook.save(filename=path+extension)
 
 def get_header_cell():
     pass
 
-def set_header_style(cell):
+def set_cell_style(cell):
     """
 Set Style for header's cell
     :param cell: an XLSX cell
@@ -139,47 +147,58 @@ Set Style for header's cell
     cell.protection = Protection(locked=True,
                                  hidden=False)
 
+def set_header_styly(Workbook):
+    pass
 
 def main(name='book.xml'):
-    tree = xml.etree.ElementTree.parse(name)  # object rifai!
-    root = tree.getroot()  # like a list
-    # Create a Workbook
-    workbook = Workbook()
+    """
+    Main script (sostituito)
+    """
+    tree = xml.etree.ElementTree.parse(name)  # "importo" un file .xml 
+    root = tree.getroot()  # ottengo la root del file, root è come una lista multidim
+    
+    # Create a Workbook per interfacciarmi al file Excel
+    workbook = Workbook() # è una lista?
+    
+    # prendo qoello appena creato
     active_workbook = workbook.active
-    # Make title
     active_workbook.title = root.tag
-
-    # --- Print Header
-    header = [elem.tag for elem in root[0]]
+    # Creo l'header
+    
+    # root path where there are iterable object..
+     
+    user_root = root[0] 
+    
+    print root[0][1].attrib['name']
+    print root[0][1]
+    # and name to show in the header of excell Tablle ex: .attrib[name] 
+    # will crash if .attrib[] doesn't exist ...
+    header = [elem.attrib['name'] for elem in user_root] # [ root[0][i], .. ]  
     active_workbook.append(header)
 
-    # set stiles for header
-    for row in active_workbook.iter_rows(row_offset=0):
+    # set stiles for header: prendo la prima riga
+    # active_workbook.iter_rows(row_offset=0) = <generator object get_squared_range at 0x01101B70>
+    for row in active_workbook.iter_rows(row_offset=0): # row = (<Cell catalog.A1>, <Cell catalog.B1>, <Cell catalog.C1>, <Cell catalog.D1>, <Cell catalog.E1>, <Cell catalog.F1>)
         for cell in row:
-            set_header_style(cell)
+            set_cell_style(cell)
 
-    # print header
-    # --- Print Elements for Row
-    i = 0
-    while i < len(root):
-        row = [val.text for val in root[i]]
-        # Rows can also be appended
+    # Print elements for Row
+    i = 1 #salto il primo elemento
+    while i < len(user_root):
+        row = [val.text for val in user_root[i]]
         active_workbook.append(row)
-        # print row
         i += 1
-        # Save the file
-    dest_filename = 'xmlTest.xlsx'
+        
+    # Save the file
+    dest_filename = 'xmlTest2.xlsx'
     workbook.save(filename=dest_filename)
 
 
 if __name__ == '__main__':
     print datetime.datetime.today()
+    # --- New 
     a = Myxml(xmlfile='book.xml')
-
-    print a.absolute_path[:-4]
-    #a.get_first_row_in_root()
-    #a.get_rows()
-
     create_xlsx_from_xlm(a)
-
-    main()
+    # --- Old
+    main('./test1.xml')
+    
