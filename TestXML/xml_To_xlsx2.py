@@ -9,10 +9,9 @@ For more info see:
     - http://www.diveintopython3.net/xml.html
     - https://openpyxl.readthedocs.org/en/default/ """
 
-import xml.etree.ElementTree as et
+import xml.etree.ElementTree as ET
 
 from openpyxl import Workbook
-
 
 
 def main():
@@ -21,35 +20,56 @@ def main():
     """
     xml_filename = "./test1.xml"
     
-    tree = et.parse(xml_filename)           # "importo" un file .xml 
+    tree = ET.parse(xml_filename)           # "importo" un file .xml
     root = tree.getroot()                   # ottengo la root del file, root è come una lista multidim
-    
+
+
     # trovo i manage object è una lista
     entry = root[0]
     managed_objects =  entry.findall('{raml20.xsd}managedObject')
-    print managed_objects # for Debug
+    print 'mg =', managed_objects # for Debug
+
+    # for debug guardo cosa c'è nel primo object:
+    p_list = managed_objects[0].findall('{raml20.xsd}p') # è una lista ...
+    print 'p= ', p_list
+
+    for p_elem in p_list:
+        if p_elem.attrib['name'] == "AdjgLAC":
+            val = p_elem.text
+            Lac = p_elem.attrib['name']
+            print Lac, val
     
-#     
-#     def get_object(managed_objects):
-#         for managed_object in managed_objects:
-#             print managed_object
-#             return managed_object
-#         
-#     get_object(managed_objects)
-    # name of obj
-    print [managed_object.attrib['name'] for managed_object in managed_objects]
-    
+
+    #print [managed_object.attrib['name'] for managed_object in managed_objects]
+
+    #print managed_object[1].attrib['name']
+
+
+    # per tutti gli oggetti
     for managed_object in managed_objects:
         name = managed_object.attrib['name']
         sorgente = name[:7]
         destinazione = name[11:]
         
-        tipo = managed_object.attrib['class']
+        classe = managed_object.attrib['class']
+
+        # per tutti i parametri p degli oggetti
+        Lac = []
+        Val = []
+        for p in managed_object.findall('{raml20.xsd}p'):
+            if p.attrib['name'] == "AdjgLAC":
+                Val.append(p.text)
+                Lac.append(p.attrib['name'])
+
+
+        print 'Lac= %s, Val= %s', (Lac,Val)
+
+
         
-        if managed_object[0].attrib['name']:
-            lac = managed_object[0].attrib['name']
-        else:
-            lac = 0
+        #if managed_object[0].attrib['name']:
+        #    lac = managed_object[0].attrib['name']
+        #else:
+        #    lac = 0
         
         print 'Sorgente: %s, Destinazione: %s, Tipo: %s' %(sorgente, destinazione, classe)
     
