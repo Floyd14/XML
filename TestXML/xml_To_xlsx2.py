@@ -10,68 +10,99 @@ For more info see:
     - https://openpyxl.readthedocs.org/en/default/ """
 
 import xml.etree.ElementTree as ET
+from openpyxl import workbook
 
-from openpyxl import Workbook
+class manObj(object):
+    """
+    devo pensarci...
+    """
+
+    def __init__(self):
+
+        self.id = 0
+
+        self.cls = ""
+        self.sorgente = ""
+        self.destinazione = ""
+        self.has_lac = True
+        self.lac = ""
+        self.target = ""
+
+        self.create()
+
+    def create(self, xmlfile = "./test1.xml"):
+
+        # node of xmlfile where there are manageobjects
+        node = ET.parse(xmlfile).getroot()[0]
+
+        managed_objs = node.findall('{raml20.xsd}managedObject') # to improve with namespace ...
+
+        # per tutti gli oggetti
+        for managed_obj in managed_objs:
+            name = managed_obj.attrib['name']
+            self.sorgente = name[:7]
+            self.destinazione = name[11:]
+            self.cls = managed_obj.attrib['class']
+            return self
+
+
+    def get_manObj(self):
+
+        manObj = {"Classe" : self.cls,
+                  "Sorgente" : self.sorgente,
+                  "Destinazione" : self.destinazione,
+                  "LAC" : self.lac,
+                  "Target" : self.target,
+                  "??" : self.has_lac}
+
+        return manObj
+
 
 
 def main():
     """
-    Main script (sostituito)
+    Main script
     """
     xml_filename = "./test1.xml"
     
     tree = ET.parse(xml_filename)           # "importo" un file .xml
     root = tree.getroot()                   # ottengo la root del file, root è come una lista multidim
 
-
     # trovo i manage object è una lista
     entry = root[0]
     managed_objects =  entry.findall('{raml20.xsd}managedObject')
-    print 'mg =', managed_objects # for Debug
 
-    # for debug guardo cosa c'è nel primo object:
-    p_list = managed_objects[0].findall('{raml20.xsd}p') # è una lista ...
-    print 'p= ', p_list
-
-    for p_elem in p_list:
-        if p_elem.attrib['name'] == "AdjgLAC":
-            val = p_elem.text
-            Lac = p_elem.attrib['name']
-            print Lac, val
-    
-
-    #print [managed_object.attrib['name'] for managed_object in managed_objects]
-
-    #print managed_object[1].attrib['name']
 
 
     # per tutti gli oggetti
     for managed_object in managed_objects:
+
+        myObj = [] # l'oggetto che voglio creare
+
+        Lac = ""
+        Lac_val = ""
+        # per tutti i p
+        for p in managed_object.findall('{raml20.xsd}p'):
+            if p.attrib['name'] == "AdjgLAC":
+                Lac = p.attrib['name']
+                Lac_val = p.text
+
+
         name = managed_object.attrib['name']
         sorgente = name[:7]
         destinazione = name[11:]
         
         classe = managed_object.attrib['class']
 
-        # per tutti i parametri p degli oggetti
-        Lac = []
-        Val = []
-        for p in managed_object.findall('{raml20.xsd}p'):
-            if p.attrib['name'] == "AdjgLAC":
-                Val.append(p.text)
-                Lac.append(p.attrib['name'])
+        myObj = [sorgente, destinazione, classe, Lac_val] # oggetto creato ...
+        print 'Sorgente: %s, Destinazione: %s, Tipo: %s, Lac: %s, Lac_val: %s' %(sorgente, destinazione, classe, Lac, Lac_val)
 
+    # Create a Workbook per interfacciarmi al file Excel
+    workbook = Workbook().active  # � una lista?
 
-        print 'Lac= %s, Val= %s', (Lac,Val)
+    # prendo qoello appena creato
+    workbook.title = root.tag
 
-
-        
-        #if managed_object[0].attrib['name']:
-        #    lac = managed_object[0].attrib['name']
-        #else:
-        #    lac = 0
-        
-        print 'Sorgente: %s, Destinazione: %s, Tipo: %s' %(sorgente, destinazione, classe)
     
     #def mg_get_class(managed_objects):
     #    [cls for managed_object. in managed_objects]
@@ -116,3 +147,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+
