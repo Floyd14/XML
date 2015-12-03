@@ -10,7 +10,7 @@ For more info see:
     - https://openpyxl.readthedocs.org/en/default/ """
 
 import xml.etree.ElementTree as ET
-from openpyxl import workbook
+from openpyxl import Workbook
 
 class manObj(object):
     """
@@ -58,7 +58,6 @@ class manObj(object):
         return manObj
 
 
-
 def main():
     """
     Main script
@@ -71,22 +70,23 @@ def main():
     # trovo i manage object è una lista
     entry = root[0]
     managed_objects =  entry.findall('{raml20.xsd}managedObject')
-
-
-
+    
+    myObjs = []
+    
     # per tutti gli oggetti
     for managed_object in managed_objects:
-
         myObj = [] # l'oggetto che voglio creare
 
-        Lac = ""
-        Lac_val = ""
+        lac = ""
+        lac_val = ""
+        target = ""
         # per tutti i p
         for p in managed_object.findall('{raml20.xsd}p'):
             if p.attrib['name'] == "AdjgLAC":
-                Lac = p.attrib['name']
-                Lac_val = p.text
-
+                lac = p.attrib['name']
+                lac_val = p.text
+            if  p.attrib['name'] == "TargetCellDN":
+                target = p.text[10:-10]
 
         name = managed_object.attrib['name']
         sorgente = name[:7]
@@ -94,56 +94,37 @@ def main():
         
         classe = managed_object.attrib['class']
 
-        myObj = [sorgente, destinazione, classe, Lac_val] # oggetto creato ...
-        print 'Sorgente: %s, Destinazione: %s, Tipo: %s, Lac: %s, Lac_val: %s' %(sorgente, destinazione, classe, Lac, Lac_val)
+        myObj = [sorgente, destinazione, classe, lac_val, target] # oggetto creato ...
+        print 'Sorgente: %s, Destinazione: %s, Tipo: %s, Lac: %s, Lac_val: %s, Tar: %s' %(sorgente, destinazione, classe, lac, lac_val, target)
+        myObjs.append(myObj)
+        
+    print "myObjs= ", myObjs
 
     # Create a Workbook per interfacciarmi al file Excel
-    workbook = Workbook().active  # � una lista?
-
+    workbook = Workbook()
+    my_workbook = workbook.active  # � una lista?
+    
     # prendo qoello appena creato
-    workbook.title = root.tag
-
+    my_workbook.title = root.tag
+    header = ['Sorgente',"Destinazione", "Classe", "Lac", "Targhet"]
+    my_workbook.append(header)
+    
+    for obj in myObjs:
+        my_workbook.append(obj)
+    
+    # Save the file
+    dest_filename = 'xmlTest3.xlsx'
+    workbook.save(filename=dest_filename)
     
     #def mg_get_class(managed_objects):
     #    [cls for managed_object. in managed_objects]
     #    return
-        
-        
-#     # Create a Workbook per interfacciarmi al file Excel
-#     workbook = Workbook() # � una lista?
-#     
-#     # prendo qoello appena creato
-#     active_workbook = workbook.active
-#     active_workbook.title = root.tag
-#     # Creo l'header
-#     
-#     # root path where there are iterable object..
-#      
-#     user_root = root[0] 
-#     
-#     print root[0][1].attrib['name']
-#     print root[0][1]
-#     # and name to show in the header of excell Tablle ex: .attrib[name] 
-#     # will crash if .attrib[] doesn't exist ...
-#     header = [elem.attrib['name'] for elem in user_root] # [ root[0][i], .. ]  
-#     active_workbook.append(header)
-# 
+       
 #     # set stiles for header: prendo la prima riga
 #     # active_workbook.iter_rows(row_offset=0) = <generator object get_squared_range at 0x01101B70>
 #     for row in active_workbook.iter_rows(row_offset=0): # row = (<Cell catalog.A1>, <Cell catalog.B1>, <Cell catalog.C1>, <Cell catalog.D1>, <Cell catalog.E1>, <Cell catalog.F1>)
 #         for cell in row:
 #             set_cell_style(cell)
-# 
-#     # Print elements for Row
-#     i = 1 #salto il primo elemento
-#     while i < len(user_root):
-#         row = [val.text for val in user_root[i]]
-#         active_workbook.append(row)
-#         i += 1
-#         
-#     # Save the file
-#     dest_filename = 'xmlTest2.xlsx'
-#     workbook.save(filename=dest_filename)
 
 if __name__ == '__main__':
     main()
