@@ -12,51 +12,6 @@ For more info see:
 import xml.etree.ElementTree as ET
 from openpyxl import Workbook
 
-class manObj(object):
-    """
-    devo pensarci...
-    """
-
-    def __init__(self):
-
-        self.id = 0
-
-        self.cls = ""
-        self.sorgente = ""
-        self.destinazione = ""
-        self.has_lac = True
-        self.lac = ""
-        self.target = ""
-
-        self.create()
-
-    def create(self, xmlfile = "./test1.xml"):
-
-        # node of xmlfile where there are manageobjects
-        node = ET.parse(xmlfile).getroot()[0]
-
-        managed_objs = node.findall('{raml20.xsd}managedObject') # to improve with namespace ...
-
-        # per tutti gli oggetti
-        for managed_obj in managed_objs:
-            name = managed_obj.attrib['name']
-            self.sorgente = name[:7]
-            self.destinazione = name[11:]
-            self.cls = managed_obj.attrib['class']
-            return self
-
-
-    def get_manObj(self):
-
-        manObj = {"Classe" : self.cls,
-                  "Sorgente" : self.sorgente,
-                  "Destinazione" : self.destinazione,
-                  "LAC" : self.lac,
-                  "Target" : self.target,
-                  "??" : self.has_lac}
-
-        return manObj
-
 
 def main():
     """
