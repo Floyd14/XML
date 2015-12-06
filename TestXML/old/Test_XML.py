@@ -43,5 +43,3 @@ for book in root.findall('book'):
     author_attribute = book.get('author')
     
     print '%s, %s, %s' %(title, author, author_attribute)
-
-
