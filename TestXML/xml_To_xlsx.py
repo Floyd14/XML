@@ -201,4 +201,3 @@ if __name__ == '__main__':
     create_xlsx_from_xlm(a)
     # --- Old
     main('./test1.xml')
-    
