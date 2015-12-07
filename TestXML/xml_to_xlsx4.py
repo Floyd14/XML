@@ -3,9 +3,33 @@
 import xml.etree.ElementTree
 
 
+# Ritorno una lista da un file xml
+def get_list_from_xml(xmlfile='./test1.xml', debug=False):
+    """
+    Ritorna una lista di managedObject trovati in un file xml.
+
+    :param xmlfile: str (path of .xml file)
+    :param debug: bool (to trigger debug mode)
+    :return: list
+    """
+
+    objs_name = "{raml20.xsd}managedObject"
+    node = xml.etree.ElementTree.parse(xmlfile).getroot()[0]  # node of xmlfile where
+        # there are managed_objects
+
+    objs_list = node.findall(objs_name)  # find all the managed_Object
+    #  (it's list)
+
+    if debug:
+        print("Creata la lista id: {} con {}".format(id(objs_list), len(objs_list)))
+
+    return objs_list
+
+
+# Classe funzionante NON MODIFICARE
 class ProcessXml:
     """
-    MyClass() è Una lista [...] {}.
+    ProcessXml() prende uno specifico xml file e lo processa.
 
     1- La classe legge un xml
     2- memorizza i managed_object in una lista[]
@@ -13,8 +37,6 @@ class ProcessXml:
 
     La classe è itarabile (può essere richiamata in un loop)
     """
-
-    KEYS = ("ID", "Sorgente", "Destinazione", "Classe", "LAC", "Target")
 
     def __init__(self, xmlfile='./test1.xml', debug=False):
 
@@ -24,7 +46,7 @@ class ProcessXml:
         self.objs_list = []  # lista di obj che sono liste
         self.obj = []  # gli obj sono liste
 
-        self.formatted_obj = dict((key, None) for key in self.KEYS)  # an empty {} template
+        self.formatted_obj = {}
 
         # for debug only
         if self.DEBUG:
@@ -80,8 +102,8 @@ class ProcessXml:
             if self.DEBUG:
                 print(self.get_obj_from_list.__doc__)
                 print("Yelding {} ...".format(elem))
-            self.obj = elem
 
+            self.obj = elem
             yield self.obj
 
     def format_obj(self):
@@ -89,6 +111,8 @@ class ProcessXml:
 
         :return: dictionary (of the managed object)
         """
+
+        KEYS = ("ID", "Sorgente", "Destinazione", "Classe", "LAC", "Target")
 
         for elem in self.get_obj_from_list():
             print("Processo l' elemento: {}\n".format(elem))
@@ -103,12 +127,14 @@ class ProcessXml:
                                                                           destinazione,
                                                                           classe)
 
-            self.formatted_obj = {self.KEYS[1]: sorgente,
-                                  self.KEYS[2]: destinazione,
-                                  self.KEYS[3]: classe}
+            self.formatted_obj = {KEYS[1]: sorgente,
+                                  KEYS[2]: destinazione,
+                                  KEYS[3]: classe}
 
             print("-> creato {}: {}".format(id(self.formatted_obj), self.formatted_obj))
 
 
 if __name__ == '__main__':
-    a = ProcessXml(debug=True)
+    # a = ProcessXml(debug=True)
+
+
