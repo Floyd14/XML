@@ -27,28 +27,49 @@ def get_managed_objects_list_from_xml(xml_filename='./test1.xml'):
     if managed_objs:
         # print out for debug
         if DEBUG:
-            for index, obj in enumerate(managed_objs):
-                print("Trovato elemento {:-4}: {}".format(index, obj))
+            for index, my_obj in enumerate(managed_objs):
+                print("Trovato elemento {:-4}: {}".format(index, my_obj))
 
         # return the managed_object list []
         print("Creata la lista {} contenente {} oggetti".format('XX', len(managed_objs)))
-        return managed_objects_list
+        return managed_objs
 
     # se non trovo nulla
     else:
         print("Non sono stati trovati elementi.")
         return None
 
-def get_object_from_list(self):
-    print('ff')
+def get_object_from_list(alist):
+    '''Take managed object list and yield an element
 
-    testlist = get_managed_objects_list_from_xml()
-    print(testlist)
+    It's a generator (can be used in a for loop)
 
-    for obj in testlist:
+    :param list: of managed_objects
+    :return: a managed_object (that is another list) of the list at time
+    '''
+
+    print('\nInside get_obj_generator\n')
+    for obj in alist:
         print(obj)
         yield obj
-        #next()
+
+def format_a_managed_gbject(obj):
+    '''
+    Richiamo il metodo get_object_from_list that yeld object and
+
+    :return:
+    '''
+
+    print("\nInside the formatting func.\n")
+    print("Make the element {} biutifull!!".format(obj))
+
+    # per ogni oggetto in lista
+    name = obj.attrib['name']
+    sorgente = name[:7]
+    destinazione = name[11:]
+    classe = obj.attrib['class']
+
+    print 'Sorgente: {}\nDestinazione: {}\nTipo: {}\n'.format(sorgente, destinazione, classe)
 
 class ManObj:
     """
@@ -73,6 +94,17 @@ class ManObj:
             print("Inizializzo dictionary template:\n{}".format(my_managed_object))
 
 
+    def get_element_from_managed_object_list(self, managed_ogject_list):
+        '''
+        Iterator method. (method are object too)
+
+        :param managed_ogject_list:
+        :return: another list (the element)
+        '''
+        for elem in managed_ogject_list:
+            yield elem
+
+
     def format_object(self):
         '''
         format the managed object list into
@@ -93,8 +125,8 @@ class ManObj:
 
 
 if __name__ == '__main__':
-    get_managed_objects_list_from_xml()
-    get_object_from_list()
-    a = ManObj(debug=True)
-    # a.get_managed_objects_list_from_xml()
-    # a.get_object_from_list()
+
+    my_list = get_managed_objects_list_from_xml()
+    for obj in get_object_from_list(my_list):
+        print('yelding..')
+        format_a_managed_gbject(obj)
