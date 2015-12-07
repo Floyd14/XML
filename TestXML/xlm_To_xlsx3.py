@@ -7,8 +7,8 @@
 import xml.etree.ElementTree
 import openpyxl
 
-
 DEBUG = True
+
 
 def get_managed_objects_list_from_xml(xml_filename='./test1.xml'):
     '''
@@ -39,26 +39,36 @@ def get_managed_objects_list_from_xml(xml_filename='./test1.xml'):
         print("Non sono stati trovati elementi.")
         return None
 
+
 def get_object_from_list(alist):
     '''Take managed object list and yield an element
 
     It's a generator (can be used in a for loop)
 
-    :param list: of managed_objects
+    :param alist: of managed_objects
     :return: a managed_object (that is another list) of the list at time
     '''
 
     print('\nInside get_obj_generator\n')
-    for obj in alist:
-        print(obj)
-        yield obj
+    for my_obj in alist:
+        print(my_obj)
+        yield my_obj
+
+
+KEYS = ("ID", "Sorgente", "Destinazione", "Classe", "LAC", "Target")
+
 
 def format_a_managed_gbject(obj):
     '''
     Richiamo il metodo get_object_from_list that yeld object and
 
+    :param obj:
     :return:
     '''
+
+    # an empty template
+    my_managed_object = dict((key, None) for key in KEYS)
+    print("Empty template:\n{}".format(my_managed_object))
 
     print("\nInside the formatting func.\n")
     print("Make the element {} biutifull!!".format(obj))
@@ -71,6 +81,10 @@ def format_a_managed_gbject(obj):
 
     print 'Sorgente: {}\nDestinazione: {}\nTipo: {}\n'.format(sorgente, destinazione, classe)
 
+    my_managed_object['a'] = name
+    print("Dictionary:\n{}".format(my_managed_object))
+
+
 class ManObj:
     """
     Una lista [...] {}
@@ -82,8 +96,10 @@ class ManObj:
 
     def __init__(self, debug=False):
 
-        self.DEBUG = debug              # Bool for trigger Debug mode
+        self.DEBUG = debug  # Bool for trigger Debug mode
         self.managed_objects_list = []  # list of all selected objects in the xml file
+
+        self.sorgente, self.destinazione, self.classe = [()]
 
         # an empty template
         my_managed_object = dict((key, None) for key in self.KEYS)
@@ -93,26 +109,12 @@ class ManObj:
             print("Debug mode is set to {}.".format(self.DEBUG))
             print("Inizializzo dictionary template:\n{}".format(my_managed_object))
 
-
-    def get_element_from_managed_object_list(self, managed_ogject_list):
-        '''
-        Iterator method. (method are object too)
-
-        :param managed_ogject_list:
-        :return: another list (the element)
-        '''
-        for elem in managed_ogject_list:
-            yield elem
-
-
     def format_object(self):
         '''
         format the managed object list into
 
         :return: a well formatted managed object dictionary
         '''
-
-        self.get_object_from_list
 
         # per ogni oggetto in lista
         name = obj.attrib['name']
