@@ -2,90 +2,99 @@
 
 """Convert specific xml to xlsx.
 
-
-
 """
 
 import xml.etree.ElementTree
 import openpyxl
 
 
+DEBUG = True
+
+def get_managed_objects_list_from_xml(xml_filename='./test1.xml'):
+    '''
+    Set the xml file to parse and return a list of managed object or None
+
+    :param xml_filename: the xml to parse
+    :return: list of all object [<element>]
+    '''
+
+    # node of xmlfile where there are managed_objects
+    node = xml.etree.ElementTree.parse(xml_filename).getroot()[0]
+    # find all the managed_Object
+    managed_objs = node.findall("{raml20.xsd}managedObject")
+
+    # if exist
+    if managed_objs:
+        # print out for debug
+        if DEBUG:
+            for index, obj in enumerate(managed_objs):
+                print("Trovato elemento {:-4}: {}".format(index, obj))
+
+        # return the managed_object list []
+        print("Creata la lista {} contenente {} oggetti".format('XX', len(managed_objs)))
+        return managed_objects_list
+
+    # se non trovo nulla
+    else:
+        print("Non sono stati trovati elementi.")
+        return None
+
+def get_object_from_list(self):
+    print('ff')
+
+    testlist = get_managed_objects_list_from_xml()
+    print(testlist)
+
+    for obj in testlist:
+        print(obj)
+        yield obj
+        #next()
+
 class ManObj:
     """
-    Una lista [...] 
+    Una lista [...] {}
     
     iterabile = può essere richiamata in un for loop
     """
 
     KEYS = ("ID", "Sorgente", "Destinazione", "Classe", "LAC", "Target")
 
-    def __init__(self):
+    def __init__(self, debug=False):
 
-        for key in self.KEYS:
-            self.KEYS = None
+        self.DEBUG = debug              # Bool for trigger Debug mode
+        self.managed_objects_list = []  # list of all selected objects in the xml file
 
-        self.has_lac = False
+        # an empty template
+        my_managed_object = dict((key, None) for key in self.KEYS)
 
-    def get_managed_object_from_xml(self, xml_filename = './test1.xml', DEBUG=False):
-        '''
-        Set the xml file to parse and return a list of managed object or None
+        # for debug only
+        if self.DEBUG:
+            print("Debug mode is set to {}.".format(self.DEBUG))
+            print("Inizializzo dictionary template:\n{}".format(my_managed_object))
 
-        :param xml_filename: the xml to parse
-        :return: list of all object [<element>]
-        '''
-
-        # node of xmlfile where there are managed_objects
-        node = xml.etree.ElementTree.parse(xml_filename).getroot()[0]
-        # find all the managed_Object
-        managed_objs = node.findall("{raml20.xsd}managedObject")
-
-        # se esiste
-        if managed_objs:
-            # print out for debug
-            if DEBUG:
-                for index, obj in enumerate(managed_objs):
-                    print("Trovato elemento {:-4}: {}".format(index, obj))
-
-            # ritorno la managed_object list []
-            self.managed_object = managed_objs
-            print("Creata la lista {} contenente {} oggetti".format('XX', len(managed_objs)))
-            return self.managed_object
-
-        # se non trovo nulla
-        else:
-            print("Non sono stati trovati elementi.")
-            return None
 
     def format_object(self):
         '''
-        format the managed object list
+        format the managed object list into
 
-        :return: a well formatted managed object list
+        :return: a well formatted managed object dictionary
         '''
 
-        # Controllo se esiste una lista di oggetti
-        if self.managed_objs:
-            for obj in self.managed_object:
+        self.get_object_from_list
 
-                # per ogni oggetto in lista
-                name = obj.attrib['name']
-                self.sorgente = name[:7]
-                self.destinazione = name[11:]
+        # per ogni oggetto in lista
+        name = obj.attrib['name']
+        self.sorgente = name[:7]
+        self.destinazione = name[11:]
 
-                self.classe = obj.attrib['class']
+        self.classe = obj.attrib['class']
 
-        else:
-            print("Non posso formattare una lista vuota.")
+        print("Non posso formattare una lista vuota.")
 
-    def get_manObj(self):
-        manObj = {"Classe" : self.classe,
-                  "Sorgente" : self.sorgente,
-                  "Destinazione" : self.destinazione,
-                  "LAC" : self.lac,
-                  "Target" : self.target,
-                  "??" : self.has_lac}
-
-        return manObj
 
 if __name__ == '__main__':
-    a = ManObj().get_managed_object_from_xml(DEBUG=True)
+    get_managed_objects_list_from_xml()
+    get_object_from_list()
+    a = ManObj(debug=True)
+    # a.get_managed_objects_list_from_xml()
+    # a.get_object_from_list()

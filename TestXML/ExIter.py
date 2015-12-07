@@ -34,7 +34,7 @@ class LazyRules:
             # ritoniamo quell'elemento
             return self.cache[self.cache_index - 1]
         
-        # se il file è chiuso
+        # se il file ï¿½ chiuso
         if self.pattern_file.closed:
             raise StopIteration
         
@@ -45,8 +45,9 @@ class LazyRules:
             raise StopIteration
 
         pattern, search, replace = line.split(None, 3)
-        funcs = build_match_and_apply_functions(
+        #funcs = build_match_and_apply_functions(
             pattern, search, replace)
+
         self.cache.append(funcs)
         return funcs
 
