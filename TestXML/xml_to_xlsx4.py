@@ -1,9 +1,11 @@
 # -*- coding: UTF-8 -*-
 
 import xml.etree.ElementTree
+import openpyxl
 
 
 # Ritorno una lista da un file xml
+
 def get_list_from_xml(xmlfile='./test1.xml', debug=False):
     """
     Ritorna una lista di managedObject trovati in un file xml.
@@ -74,11 +76,13 @@ class Generator:
 
         for elemento in self.get_formatted_elem():
             print(elemento)
+            yield elemento
 
-        raise StopIteration
+
 
     def get_elem(self):
         """
+        generatore di elementi dalla lista
         Generator: prende una lista e ritorna gli elementi uno alla volta
 
         :return: list (element in list one at time)
@@ -121,6 +125,16 @@ class Generator:
 
     def save_element(self):
         pass
+
+def create_xlsx_file_named(xlsxfile='xmlTest4.xlsx'):
+    # create Workbook and make it active
+    workbook = openpyxl.Workbook()
+    active_workbook = workbook.active
+
+    active_workbook.title = "da implementare"
+
+
+    active_workbook.append(list(Generator(get_list_from_xml(debug=True), debug=True)))
 
 
 # Classe funzionante NON MODIFICARE
@@ -234,6 +248,5 @@ class ProcessXml:
 if __name__ == '__main__':
     # a = ProcessXml(debug=True)
 
-    list(Generator(get_list_from_xml(debug=True), debug=True))
-    print(list)
-
+    data = list(Generator(get_list_from_xml(debug=True), debug=True))
+    print("In main orint: {}".format(data[1]))
