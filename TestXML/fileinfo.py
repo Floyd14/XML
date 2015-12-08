@@ -35,4 +35,7 @@ class MP3FileInfo(FileInfo):
                   "comment" :   (  97, 126, stripnulls)
                   "genre"   :   ( 127, 128, ord)}
 
+    def _parse(self,filemane):
+        "parse ID3v1.0 from MP3"
+
 
