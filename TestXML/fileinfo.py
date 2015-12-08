@@ -111,26 +111,42 @@ class MP3FileInfo(FileInfo):
         FileInfo.__setitem__(self, key, item)
 
 
+# prende una directory e una lista di estensioni e ritorna una lista di istanze
 def listDirectory(directory, fileExtList):
     "get list of file info objects for files of particular extensions"
-    fileList = [os.path.normcase(f) for f in os.listdir(directory)]
+
+    # os.listdir(directory) -> lista di tutti i file in directory
+    # os.path.normcase(f) -> normalizza tutti i file nella lista (per sistemi case-INsensitive)
+
+    fileList = [os.path.normcase(f) for f in os.listdir(directory)]      # è una lista NORMALIZZATA !
+
+    # if os.path.splitext -> divide il file name in nome e estensione,
+    # [1] guardo l'estensione
+    # se è presente nella lista fileExtList
+    # ricostruisco il percorso completo del file os.path.join(directory, f)
     fileList = [os.path.join(directory, f) for f in fileList \
                 if os.path.splitext(f)[1] in fileExtList]
 
 
     # argomenti: nome file è richiesto, sys.module è opzionale
     # sys.module è un dictionary (con tutti i moduli di python)
-
     def getFileInfoClass(filename, module=sys.modules[FileInfo.__module__]):
         "get file info class from filename extension"
 
-        # si vedrà poi ma finisce per avere il nome di una classe
-        subclass = "%sFileInfo" % os.path.splitext(filename)[1].upper()[1:]
+        # prende l'estensione del file,
+        # upper() -> la forza in caratteri maiuscoli
+        # [1:] -> affetta via il punto
+        subclass = "%sFileInfo" % os.path.splitext(filename)[1].upper()[1:]  # subclass = 'MP3FileInfo'
 
         # se questo modulo contiene una classe con lo stesso nome di subclass
         # allora restituisci tale classe
         # altrimenti restituisci FileInfo
         return hasattr(module, subclass) and getattr(module, subclass) or FileInfo
+
+    # se esiste ritorniamo la classe! (non una istanza)
+    # per ogni file f in lista
+    # chiamo getFileInfo(f) passandoglki il filename f -> ritorna una classe !
+    #
     return [getFileInfoClass(f)(f) for f in fileList]
 
 if __name__ == "__main__":
