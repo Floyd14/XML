@@ -117,9 +117,19 @@ def listDirectory(directory, fileExtList):
     fileList = [os.path.join(directory, f) for f in fileList \
                 if os.path.splitext(f)[1] in fileExtList]
 
+
+    # argomenti: nome file è richiesto, sys.module è opzionale
+    # sys.module è un dictionary (con tutti i moduli di python)
+
     def getFileInfoClass(filename, module=sys.modules[FileInfo.__module__]):
         "get file info class from filename extension"
+
+        # si vedrà poi ma finisce per avere il nome di una classe
         subclass = "%sFileInfo" % os.path.splitext(filename)[1].upper()[1:]
+
+        # se questo modulo contiene una classe con lo stesso nome di subclass
+        # allora restituisci tale classe
+        # altrimenti restituisci FileInfo
         return hasattr(module, subclass) and getattr(module, subclass) or FileInfo
     return [getFileInfoClass(f)(f) for f in fileList]
 
