@@ -8,6 +8,9 @@ def get_list_from_xml(xmlfile='./test1.xml', debug=False):
     """
     Ritorna una lista di managedObject trovati in un file xml.
 
+    Apre un file xml, imposta l'albero e la radice dell'xml, trova gli oggetti con la stringa objs_name
+    e li mette in lista objs_list (gli oggetti sono anch'essi liste)
+
     :param xmlfile: str (path of .xml file)
     :param debug: bool (to trigger debug mode)
     :return: list
@@ -15,15 +18,109 @@ def get_list_from_xml(xmlfile='./test1.xml', debug=False):
 
     objs_name = "{raml20.xsd}managedObject"
     node = xml.etree.ElementTree.parse(xmlfile).getroot()[0]  # node of xmlfile where
-        # there are managed_objects
+    # there are managed_objects
 
     objs_list = node.findall(objs_name)  # find all the managed_Object
     #  (it's list)
 
     if debug:
-        print("Creata la lista id: {} con {}".format(id(objs_list), len(objs_list)))
+        print("Creata la lista id: {} con {} elementi".format(id(objs_list), len(objs_list)))
 
     return objs_list
+
+
+class Generator:
+    # class mygenerator(object):
+    # def __init__(self):
+    #     next_value = compute_first_value()
+    # def __iter__(self):
+    #     return self
+    # def next(self):
+    #     if next_value == terminating_value:
+    #         raise StopIteration()
+    #     return next_value
+
+    def __init__(self, alist=(), debug=False):
+
+        self.temp1 = None
+        self.temp2 = None
+
+        self.cache = alist
+        self.debug = debug
+
+    def __iter__(self):
+        """
+        Viene chiamato la prima volta! dal ( for.. in.. )
+        :return: self
+        """
+        # self.index = 0 ..Non mi serve creare un indice
+        if self.debug:
+            print("I'm in __iter__() method..")
+            print("I Just call next")
+
+        self.next()
+
+    # Compatibilità con Python 3x ...
+    def __next__(self):
+        return self.next()
+
+    def next(self):
+        """
+        Viene chiamato fino a quamdo non raggiunge StopIteration
+        :return: next
+        """
+        if self.debug:
+            print("I'm in next() method")
+
+        for elemento in self.get_formatted_elem():
+            print(elemento)
+
+        raise StopIteration
+
+    def get_elem(self):
+        """
+        Generator: prende una lista e ritorna gli elementi uno alla volta
+
+        :return: list (element in list one at time)
+        """
+        for elem in self.cache:
+            self.temp1 = elem
+            yield self.temp1     # scrivo temporaneamente temp1
+
+        raise StopIteration
+
+    def get_formatted_elem(self):
+        """
+        Generator: ...
+
+        :return: dict {} ()
+        """
+
+        keys = ("ID", "Sorgente", "Destinazione", "Classe", "LAC", "Target")
+        for el in self.get_elem():
+            print("Processo l' elemento: {}".format(el))
+
+            name = el.attrib['name']
+            sorgente = name[:7]
+            destinazione = name[11:]
+            classe = el.attrib['class']
+
+            if self.debug:
+                print "Sorgente: {}\nDestinazione: {}\nClasse: {}".format(sorgente,
+                                                                          destinazione,
+                                                                          classe)
+
+            formatted_obj = {keys[1]: sorgente,
+                             keys[2]: destinazione,
+                             keys[3]: classe}
+            if self.debug:
+                print("-> creato {}: {}".format(id(formatted_obj), formatted_obj))
+
+            self.temp2 = formatted_obj  # scrivo temporanemante temp2
+            yield self.temp2
+
+    def save_element(self):
+        pass
 
 
 # Classe funzionante NON MODIFICARE
@@ -61,7 +158,7 @@ class ProcessXml:
     def get_obj_list_from_xml(self):
         """ Set the xml file to parse and return a list of managed object or None.
 
-        open xml file and parse it (setto il node e il tree) then find all th object that i need .
+        open xml file and parse it (setto il node e il tree) then find all th object that i need.
 
         :return: list (of all object [<element>])
 
@@ -112,7 +209,7 @@ class ProcessXml:
         :return: dictionary (of the managed object)
         """
 
-        KEYS = ("ID", "Sorgente", "Destinazione", "Classe", "LAC", "Target")
+        keys = ("ID", "Sorgente", "Destinazione", "Classe", "LAC", "Target")
 
         for elem in self.get_obj_from_list():
             print("Processo l' elemento: {}\n".format(elem))
@@ -127,9 +224,9 @@ class ProcessXml:
                                                                           destinazione,
                                                                           classe)
 
-            self.formatted_obj = {KEYS[1]: sorgente,
-                                  KEYS[2]: destinazione,
-                                  KEYS[3]: classe}
+            self.formatted_obj = {keys[1]: sorgente,
+                                  keys[2]: destinazione,
+                                  keys[3]: classe}
 
             print("-> creato {}: {}".format(id(self.formatted_obj), self.formatted_obj))
 
@@ -137,4 +234,6 @@ class ProcessXml:
 if __name__ == '__main__':
     # a = ProcessXml(debug=True)
 
+    list(Generator(get_list_from_xml(debug=True), debug=True))
+    print(list)
 
