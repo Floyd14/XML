@@ -25,17 +25,107 @@ class FileInfo(UserDict):
         UserDict.__init__(self)     # DEVO SEMPRE RICHIAMARE L'INIT DELLA CLASSE MADRE !
         self['name'] = filename     # adesso ho le proprietà della classe madre
 
+
+
+
+# classe Handler che sa derivare gli attributi, ecc e popolare il dictionary
 class MP3FileInfo(FileInfo):
     "store tags"
 
-    tagDataMap = {"titple"  :   (   3,  33, stripnulls)
-                  "artist"  :   (  33,  63, stripnulls)
-                  "album"   :   (  63,  93, stripnulls)
-                  "year"    :   (  93,  97, stripnulls)
-                  "comment" :   (  97, 126, stripnulls)
+    # Attributi di classe (per tutti gli oggetti di questa classe)
+    # Non li metto in init perchè init è quando creo un istanza (oggetto) !!
+
+    # Sono richiamabili con self.__class__.tagDataMap DOPO che è stata instanziata una classe!!
+    # perchè __class__ è un attributo builtin di ongni istanza!!
+    tagDataMap = {"titple"  :   (   3,  33, stripnulls),      # stripnulls è un puntatore alla funzione!
+                  "artist"  :   (  33,  63, stripnulls),      # per chiamare una funzione devo scricere stripnulls()
+                  "album"   :   (  63,  93, stripnulls),
+                  "year"    :   (  93,  97, stripnulls),
+                  "comment" :   (  97, 126, stripnulls),
                   "genre"   :   ( 127, 128, ord)}
 
-    def _parse(self,filemane):
+
+    # METODO PRIVATO: inizia con __
+    # Python non te li fa chiamare: a.__parse genera un eccezione !!
+    def __parse(self, filename):
         "parse ID3v1.0 from MP3"
+
+        self.clear()
+
+        # Gestione delle eccezioni..
+        try:
+            # apertura file ( nome, modalità, buffer)
+            fsock = open(filename, "rb", 0)
+            try:
+                fsock.seek(-128, 2)     # spostati a 128byte prima della fine del file (2 = fine del file)
+                tagdata = fsock.read(128)   # leggi 128 byte (gli ultimi del file) -> è una lista
+
+                # anche se qualcosa va storto prima vogliamo chiudere il file
+                # finally viene sempre eseguito!
+            finally:
+                fsock.close()
+
+            # Crea la tag
+            # se gli ultimi 3 byte sono == TAG
+            if tagdata[:3] == "TAG":
+
+                # leggi da destra a sinistra
+                # items() ritorna una lista dal dicionary di classe che ho definito prima
+                # il dictionary di prima è composto da:
+                # tag e una tuple (start, end, funzione)
+                # ES: primo elemento ("title", (3, 33, <func stripnulls>)
+                for tag, (start, end, parseFunc) in self.tagDataMap.items():
+
+                    # creo l'attributo tag
+                    # parse func è la funzione definita nel for
+                    # che chiame quella definita in tagDataMap ma questa volta la esegue perchè ho le parentesi
+                    # ES nel primo cilco viene eseguito stripnulls(XX)
+                    # XX è un particolare pezzo di lista tagdata
+                    self[tag] = parseFunc(tagdata[start:end])
+
+        # vai avanti se trovi l'eccezione (NON USA raise IOError che avrebbe fermato tutto)
+        except IOError:
+            pass
+
+
+    # Metodo che prede un elemento da un dizionario.
+    # questo metodo viene chiamato da python tutte le volte che si accede al valore di una chiave di un
+    # dicionary, ovvero se a è un dictionary, tutte le volte che:
+    #
+    # >>> a['name'] = 10 dove a è un dicionary
+    # che quindi è uguale a:
+    # >>> a.__setitem__('name', 10)
+    #
+    # key sta per la chiave del dictionary
+    # idem sta per il valore della chiame
+
+    def __setitem__(self, key, item):       # importante mantenere lo stesso numero di argomenti?
+
+        # Se stiamo assegnando un valore alla key 'name' chiamiamo parse per fare una elaborazione aggiuntiva
+        if key == "name" and item:
+            self.__parse(item)
+
+        # Richiamo il metodo dell'antenato che python da solo non chiama mai !!
+        # richiamo __setitem della classe FileInfo che eredita da UserDict
+        # in cui è definito __setitem__
+        FileInfo.__setitem__(self, key, item)
+
+
+def listDirectory(directory, fileExtList):
+    "get list of file info objects for files of particular extensions"
+    fileList = [os.path.normcase(f) for f in os.listdir(directory)]
+    fileList = [os.path.join(directory, f) for f in fileList \
+                if os.path.splitext(f)[1] in fileExtList]
+
+    def getFileInfoClass(filename, module=sys.modules[FileInfo.__module__]):
+        "get file info class from filename extension"
+        subclass = "%sFileInfo" % os.path.splitext(filename)[1].upper()[1:]
+        return hasattr(module, subclass) and getattr(module, subclass) or FileInfo
+    return [getFileInfoClass(f)(f) for f in fileList]
+
+if __name__ == "__main__":
+    for info in listDirectory("./testMusic", [".mp3"]):
+        print "\n".join(["%s=%s" % (k, v) for k, v in info.items()])
+        print
 
 
