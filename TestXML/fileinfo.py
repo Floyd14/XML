@@ -46,7 +46,6 @@ class MP3FileInfo(FileInfo):
     # Python non te li fa chiamare: a.__parse genera un eccezione !!
     def __parse(self, filename):
         "parse ID3v1.0 from MP3"
-
         self.clear()
 
         # Gestione delle eccezioni..

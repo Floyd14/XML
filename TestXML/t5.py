@@ -3,20 +3,27 @@
 import xml.etree.ElementTree
 from UserDict import UserDict
 
+def yeld_raw_element_from_xml(filename='./test1.xml'):
 
+    obj_name = "{raml20.xsd}managedObject"
+
+    root = xml.etree.ElementTree.parse(filename).getroot()[0]
+    for elem in root.findall(obj_name):
+        x = ManagedObject(elem)
+
+        print x
 
 class ManagedObjects(UserDict):
     # Classe conteiner #
 
-    def __init__(self, filename = None):
+    def __init__(self, raw_obj = None):
         UserDict.__init__(self)
-        self['name'] = filename  # -> chiamo self.__setitem__(self, name, filename)
-        self['data'] = None
+        self['name'] = id(raw_obj)  # -> chiamo self.__setitem__(self, name, id(raw_obj))
 
-    def __str__(self):
-
-        string = str(self['name'][2:]+' => ')
-        return string
+    # def __str__(self):
+    #
+    #     string = str(self['name'][2:]+' => ')
+    #     return string
 
 class ManagedObject(ManagedObjects):
     # Mappa (è un dictionary) di cosa chiamare:
@@ -27,21 +34,18 @@ class ManagedObject(ManagedObjects):
 
     objs_name = "{raml20.xsd}managedObject"
 
-    def __parse(self, filename):
+    def __parse(self, raw_obj):
 
         self.clear()
         #root = xml.etree.ElementTree.parse(filename).getroot()[0]
         #for elem in root.findall(self.objs_name):
 
         for tag, (function, method, attrib, start, end) in self.xmlMap.items():
-
             # al primo ciclo vale: "Classe", (<function getattr>, 'class', None, None) -> elem.attrib['class']
             # self['Classe'] = getattr(elem, 'attrib')['class'][None, None]
 
-            self[tag] = function(elem, method)[attrib][start:end]
-
+            self[tag] = function(self.raw_obj, method)[attrib][start:end]
             print(self[tag])
-
             #print(elem)
             #print(ManagedObject())
             #print(ManagedObject)
@@ -61,20 +65,6 @@ class ManagedObject(ManagedObjects):
         # finito di fare i cambiamenti chiamo il set del padre
         ManagedObjects.__setitem__(self, key, item)
 
-def test():
-
-    data = []
-    root = xml.etree.ElementTree.parse('./test1.xml').getroot()[0]
-    for elem in root.findall("{raml20.xsd}managedObject"):
-        data.append(elem)
-        elem = ManagedObject()
-        print elem
-
-    print data
-
 if __name__ == '__main__':
 
-    #filename = './test1.xml'
-    #print ManagedObject(filename)
-
-    test()
+    yeld_raw_element_from_xml()
