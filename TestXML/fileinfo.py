@@ -149,5 +149,3 @@ if __name__ == "__main__":
     for info in listDirectory("./testMusic", [".mp3"]):
         print "\n".join(["%s=%s" % (k, v) for k, v in info.items()])
         print
-
-
