@@ -26,8 +26,6 @@ class FileInfo(UserDict):
         self['name'] = filename     # adesso ho le proprietà della classe madre
 
 
-
-
 # classe Handler che sa derivare gli attributi, ecc e popolare il dictionary
 class MP3FileInfo(FileInfo):
     "store tags"
@@ -43,7 +41,6 @@ class MP3FileInfo(FileInfo):
                   "year"    :   (  93,  97, stripnulls),
                   "comment" :   (  97, 126, stripnulls),
                   "genre"   :   ( 127, 128, ord)}
-
 
     # METODO PRIVATO: inizia con __
     # Python non te li fa chiamare: a.__parse genera un eccezione !!
