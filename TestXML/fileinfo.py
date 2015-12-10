@@ -18,6 +18,7 @@ def stripnulls(data):
 
 # Definisco una classe (che deriva da UserDict)
 # è un Dictionary personalizzato
+
 class FileInfo(UserDict):
     "store file metadata"
 

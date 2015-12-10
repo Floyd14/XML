@@ -4,34 +4,14 @@ import xml.etree.ElementTree
 from UserDict import UserDict
 
 def test():
-
     obj_name = "{raml20.xsd}managedObject"
-
     root = xml.etree.ElementTree.parse('./test1.xml').getroot()[0]
     for elem in root.findall(obj_name):
-
-        #x = getattr(elem, 'attrib')['name']
-
-        y = getattr(elem, 'get')('class')   # MODIFICA!!!!!!! meglio!
-
-        u = getattr(elem, 'keys')()
-
-        #h = getattr(elem, 'iter')()  # ->  ritorna un generatore di p??
-
-        #i = list(elem) # -> ritorna una lista dei p
-
-        #l = getattr(elem, 'getchildren')() # uguale a i
-
-
-        i for i in [getattr(el, 'get')('name') for el in list(elem)] if i in [getattr(el, 'get')('name') for el in list(elem):
-            print 'ok'
-
-        #print x
-        print y
-        print u
-        #print h
-        #print i
-        #print l
+        Lac =  [getattr(p, 'text') for p in list(elem)
+               if getattr(p, 'get')('name') == 'AdjgLAC']
+        Tar = [getattr(p, 'text')[10:-10] for p in list(elem)
+               if getattr(p, 'get')('name') == 'TargetCellDN']
+        print Lac, Tar
 
 
 def get_raw_element_from_xml(filename='./test1.xml'):
@@ -60,11 +40,12 @@ class ManagedObjects(UserDict):
 class ManagedObject(ManagedObjects):
     # Mappa (è un dictionary) di cosa chiamare:
     # tag : (funzione da chiamare, metodo, nome dell'attributo, inizio e fine dello slice
-    xmlMap = {"Sorgente"    :   (getattr, 'attrib',  'name',    0,    7),
-              "Destinazione":   (getattr, 'attrib',  'name',   11, None),
-              "Classe"      :   (getattr, 'attrib', 'class', None, None),
-              "AdjgLac"     :   (getattr, 'attrib',  'name', None, None),
-              "Target"      :   (getattr, 'attrib',  'name', None, None)}
+    xmlMap = {"Sorgente"    :   ('get',  'name',    0,    7),
+              "Destinazione":   ('get',  'name',   11, None),
+              "Classe"      :   ('get', 'class', None, None),
+              #"AdjgLac"     :   ('attrib',  'name', None, None),
+              #"Target"      :   ('attrib',  'name', None, None)
+              }
 
     #objs_name = "{raml20.xsd}managedObject"
 
@@ -81,12 +62,11 @@ class ManagedObject(ManagedObjects):
         #root = xml.etree.ElementTree.parse(filename).getroot()[0]
         #for elem in root.findall(self.objs_name):
 
-        for tag, (function, method, attrib, start, end) in self.xmlMap.items():
+        for tag, (method, attrib, start, end) in self.xmlMap.items():
             # al primo ciclo vale: "Classe", (<function getattr>, 'class', None, None) -> elem.attrib['class']
             # self['Classe'] = getattr(elem, 'attrib')['class'][None, None]
 
-            self[tag] = function(item, method)[attrib][start:end]
-
+            self[tag] = getattr(item, method)(attrib)[start:end]
             #print(self[tag])
             #print(elem)
             #print(ManagedObject())
@@ -109,5 +89,5 @@ class ManagedObject(ManagedObjects):
 
 if __name__ == '__main__':
 
-    #get_raw_element_from_xml()
-    test()
+    get_raw_element_from_xml()
+    #test()
