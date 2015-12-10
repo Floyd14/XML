@@ -1,39 +1,39 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <raml version='2.0' xmlns='raml20.xsd'>
-	<cmData type='plan'>
-		<header name="hh">
-		<log action='created' dateTime='2015-11-30T04:58:13'/>
-		</header>
-		<managedObject class="ADJG" operation="update" version="RN8.0" name="CR59875 -> CR14281" distName="PLMN-PLMN/RNC-166/WBTS-5987/WCEL-59875/ADJG-0">
-			<p name="AdjgBandIndicator">0</p>
-			<p name="AdjgBCC">0</p>
-			<p name="AdjgBCCH">50</p>
-			<p name="AdjgLAC">10056</p>
-			<p name="AdjgNCC">6</p>
-			<p name="AdjgSIB">1</p>
-			<p name="AdjgTxPwrMaxRACH">33</p>
-			<p name="AdjgTxPwrMaxTCH">35</p>
-			<p name="ADJGType">0</p>
-			<p name="name">CR14281</p>
-			<p name="NrtHopgIdentifier">1</p>
-			<p name="RtHopgIdentifier">1</p>
-			<p name="TargetCellDN">PLMN-PLMN/BSC-390802/BCF-517/BTS-517</p>
-		</managedObject>
-		<managedObject class="ADJG" operation="update" version="RN8.0" name="CR59874 -> CR14281" distName="PLMN-PLMN/RNC-166/WBTS-5987/WCEL-59874/ADJG-1">
-			<p name="AdjgBandIndicator">0</p>
-			<p name="AdjgBCC">0</p>
-			<p name="AdjgBCCH">50</p>
-			<p name="AdjgLAC">10056</p>
-			<p name="AdjgNCC">6</p>
-			<p name="AdjgSIB">1</p>
-			<p name="AdjgTxPwrMaxRACH">33</p>
-			<p name="AdjgTxPwrMaxTCH">35</p>
-			<p name="ADJGType">0</p>
-			<p name="name">CR14281</p>
-			<p name="NrtHopgIdentifier">1</p>
-			<p name="RtHopgIdentifier">1</p>
-			<p name="TargetCellDN">PLMN-PLMN/BSC-390802/BCF-517/BTS-517</p>
-		</managedObject>
+<cmData type='plan'>
+<header>
+<log action='created' dateTime='2015-11-30T04:58:13'/>
+</header>
+<managedObject class="ADJG" operation="update" version="RN8.0" name="CR59875 -> CR14281" distName="PLMN-PLMN/RNC-166/WBTS-5987/WCEL-59875/ADJG-0">
+<p name="AdjgBandIndicator">0</p>
+<p name="AdjgBCC">0</p>
+<p name="AdjgBCCH">50</p>
+<p name="AdjgLAC">10056</p>
+<p name="AdjgNCC">6</p>
+<p name="AdjgSIB">1</p>
+<p name="AdjgTxPwrMaxRACH">33</p>
+<p name="AdjgTxPwrMaxTCH">35</p>
+<p name="ADJGType">0</p>
+<p name="name">CR14281</p>
+<p name="NrtHopgIdentifier">1</p>
+<p name="RtHopgIdentifier">1</p>
+<p name="TargetCellDN">PLMN-PLMN/BSC-390802/BCF-517/BTS-517</p>
+</managedObject>
+<managedObject class="ADJG" operation="update" version="RN8.0" name="CR59874 -> CR14281" distName="PLMN-PLMN/RNC-166/WBTS-5987/WCEL-59874/ADJG-1">
+<p name="AdjgBandIndicator">0</p>
+<p name="AdjgBCC">0</p>
+<p name="AdjgBCCH">50</p>
+<p name="AdjgLAC">10056</p>
+<p name="AdjgNCC">6</p>
+<p name="AdjgSIB">1</p>
+<p name="AdjgTxPwrMaxRACH">33</p>
+<p name="AdjgTxPwrMaxTCH">35</p>
+<p name="ADJGType">0</p>
+<p name="name">CR14281</p>
+<p name="NrtHopgIdentifier">1</p>
+<p name="RtHopgIdentifier">1</p>
+<p name="TargetCellDN">PLMN-PLMN/BSC-390802/BCF-517/BTS-517</p>
+</managedObject>
 <managedObject class="ADJG" operation="update" version="RN8.0" name="CR59873 -> CR14281" distName="PLMN-PLMN/RNC-166/WBTS-5987/WCEL-59873/ADJG-0">
 <p name="AdjgBandIndicator">0</p>
 <p name="AdjgBCC">0</p>

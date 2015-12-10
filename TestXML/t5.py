@@ -4,7 +4,7 @@ import xml.etree.ElementTree
 from UserDict import UserDict
 
 
-def get_raw_element_from_xml(filename='./test1.xml',
+def get_raw_element_from_xml(filename='./test3.xml',
                              obj_name="{raml20.xsd}managedObject"):
 
     root = xml.etree.ElementTree.parse(filename).getroot()[0]
