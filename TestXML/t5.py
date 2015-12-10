@@ -62,9 +62,14 @@ class ManagedObject(ManagedObjects):
         a = "Dictionary (id:{}) = ".format(self.name)
         b = "{} -> {}".format(self['Sorgente'], self['Destinazione'])
         c = "\n\tClasse: {}\n\tLac: {}".format(self['Classe'], self['Lac'])
-        d = "\n\tSubzona: {}\n\tSettore: {}\n\tSiteCode: {}".format(self['Subzona'], self['Settore'], self['SiteCode'])
+        d = "\n\tSubzona:    {} -> {}" \
+            "\n\tSettore:     {} -> {}" \
+            "\n\tSiteCode: {} -> {}".format(self['SSubzona'], self['DSubzona'],
+                                            self['SSettore'], self['DSettore'],
+                                            self['SSiteCode'], self['DSiteCode'])
+        e = "\n{}, Protocollo: {}\n".format(self['Relazione'], self['Protocollo'])
 
-        return a + b + c + d
+        return a + b + c + d + e
 
     def __parse(self, item):
         # item è un raw_obj
@@ -77,38 +82,53 @@ class ManagedObject(ManagedObjects):
             self[tag] = getattr(item, method)(attrib)[start:end]
             # print(self[tag])
 
-        lac = str([getattr(p, 'text') for p in list(item)
-                           if getattr(p, 'get')('name') == 'AdjgLAC'])
+        # Prendo la LAC
+        if self['Classe'] == 'ADJG':
+            self['Lac'] = str([getattr(p, 'text') for p in list(item)
+                               if getattr(p, 'get')('name') == 'AdjgLAC'])
 
-        if len(lac) > 3:
-            self['Lac'] = lac
         else:
-            self['Tar'] = str([getattr(p, 'text')[10:-10] for p in list(item)
-                           if getattr(p, 'get')('name') == 'TargetCellDN'])
+            self['Target'] = str([getattr(p, 'text')[10:-21] for p in list(item)
+                                  if getattr(p, 'get')('name') == 'TargetCellDN'])
 
-            self['Lac'] = self['Tar']
+            self['Lac'] = self['Target']
 
+        self['SSubzona'] = self['Sorgente'][:2]
+        self['SSiteCode'] = self['Sorgente'][2:-1]
+        self['SSettore'] = self['Sorgente'][-1:]
 
-        if self['Lac']:
-            self['Subzona'] = self['Lac'][2:-5]
-            self['Settore'] = self['Lac'][6:-2]
-            self['SiteCode'] = self['Lac'][2:-3]
+        self['DSubzona'] = self['Destinazione'][:2]
+        self['DSiteCode'] = self['Destinazione'][2:-1]
+        self['DSettore'] = self['Destinazione'][-1:]
 
-        def _relazione(a):
+        carrier1 = ('1', '4', '7')
+        carrier2 = ('2', '5', '8')
+        carrier3 = ('3', '6', '9')
 
-            if a['Classe'] == 'ADJS':
-                print 'a'
+        rel1 = '3G <-> 3G (stessa carrier)'
+        rel2 = '3G <-> 3G (diversa carrier)'
+        rel3 = '3G -> 2G'
 
-            if a['Classe'] == 'ADJG':
-                print 'b'
+        if self['Classe'] == 'ADJS':
+            self['Relazione'] = rel1
 
-            if a['Classe'] == 'ADJI':
-                print 'c'
+            if self['SSettore'] and self['DSettore'] in (carrier1, carrier2):
+                self['Protocollo'] = 'ADJS_OPI'
 
-        _relazione(self)
+            else:
+                self['Protocollo'] = 'ADJS_OPI_ F3'
 
+        if self['Classe'] == 'ADJG':
+            self['Relazione'] = rel3
+            self['Protocollo'] = '??'
 
+        if self['Classe'] == 'ADJI':
+            self['Relazione'] = rel2
+            self['Protocollo'] = '??'
 
+        else:
+            self['Relazione'] = '?'
+            self['Protocollo'] = '??'
 
     def __setitem__(self, key, item):
         # Quando istanzio la classe managedObject (quella derivata) chiamo,
@@ -125,10 +145,12 @@ class ManagedObject(ManagedObjects):
         # finito di fare i cambiamenti chiamo il set del padre
         ManagedObjects.__setitem__(self, key, item)
 
+
 import Tkinter
 import ttk
-def create_gui():
 
+
+def create_gui():
     top = Tkinter.Tk()
     # Code to add widgets will go here...
     top.geometry("300x280+300+300")
@@ -154,7 +176,7 @@ class Example(ttk.Frame):
 
         canvas = Tkinter.Canvas(self)
         canvas.create_text(20, 30, anchor=Tkinter.W, font="Purisa",
-            text="Drag and Drop your XML file here")
+                           text="Drag and Drop your XML file here")
 
         canvas.pack(fill=Tkinter.BOTH, expand=1)
 
@@ -162,4 +184,4 @@ class Example(ttk.Frame):
 if __name__ == '__main__':
     # get_raw_element_from_xml()
     create_xlsx()
-    #create_gui()
+    # create_gui()
