@@ -4,20 +4,8 @@ import xml.etree.ElementTree
 from UserDict import UserDict
 
 
-def test():
-    obj_name = "{raml20.xsd}managedObject"
-    root = xml.etree.ElementTree.parse('./test1.xml').getroot()[0]
-    for elem in root.findall(obj_name):
-        lac = [getattr(p, 'text') for p in list(elem)
-               if getattr(p, 'get')('name') == 'AdjgLAC']
-        tar = [getattr(p, 'text')[10:-10] for p in list(elem)
-               if getattr(p, 'get')('name') == 'TargetCellDN']
-        print lac, tar
-
-
-def get_raw_element_from_xml(filename='./test1.xml'):
-    # Name of the object in xml file
-    obj_name = "{raml20.xsd}managedObject"
+def get_raw_element_from_xml(filename='./test1.xml',
+                             obj_name="{raml20.xsd}managedObject"):
 
     root = xml.etree.ElementTree.parse(filename).getroot()[0]
     for elem in root.findall(obj_name):
@@ -51,10 +39,9 @@ class ManagedObject(ManagedObjects):
 
     def __repr__(self):
         # for print the ManagedObject
-
-        a = "{} {} = ".format('Dictionary', self.name)
+        a = "Dictionary (id:{}) = ".format(self.name)
         b = "{} -> {}".format(self['Sorgente'], self['Destinazione'])
-        c = "\n{} {} {}".format(self['Classe'], self['Lac'], self['Tar'])
+        c = "\n\tClasse: {}\n\tLac: {}\n\tTarget: {}".format(self['Classe'], self['Lac'], self['Tar'])
 
         return a + b + c
 
@@ -93,4 +80,3 @@ class ManagedObject(ManagedObjects):
 
 if __name__ == '__main__':
     get_raw_element_from_xml()
-    # test()
