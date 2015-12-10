@@ -1,16 +1,36 @@
 # -*- coding: UTF-8 -*-
 
 import xml.etree.ElementTree
+import openpyxl
 from UserDict import UserDict
 
 
 def get_raw_element_from_xml(filename='./test3.xml',
                              obj_name="{raml20.xsd}managedObject"):
+    root = xml.etree.ElementTree.parse(filename).getroot()[0]
+    for elem in root.findall(obj_name):
+        x = ManagedObject(elem)
+        print x
+
+
+def create_xlsx(filename='./test3.xml',
+                obj_name="{raml20.xsd}managedObject",
+                dest_filename='xmlTest3.xlsx'):
+    workbook = openpyxl.Workbook()
+    my_wb = workbook.active
+    my_wb.title = filename[2:-4]
+
+    param = ('Sorgente', 'Destinazione', 'Classe', 'Lac', 'Tar')
 
     root = xml.etree.ElementTree.parse(filename).getroot()[0]
     for elem in root.findall(obj_name):
         x = ManagedObject(elem)
-        print repr(x)
+        print x
+        raw = [x[par] for par in list(param)]
+        my_wb.append(raw)
+
+    # Save the file
+    workbook.save(filename=dest_filename)
 
 
 class ManagedObjects(UserDict):
@@ -56,11 +76,10 @@ class ManagedObject(ManagedObjects):
             self[tag] = getattr(item, method)(attrib)[start:end]
             # print(self[tag])
 
-        self['Lac'] = [getattr(p, 'text') for p in list(item)
-                       if getattr(p, 'get')('name') == 'AdjgLAC']
-
-        self['Tar'] = [getattr(p, 'text')[10:-10] for p in list(item)
-                       if getattr(p, 'get')('name') == 'TargetCellDN']
+        self['Lac'] = str([getattr(p, 'text') for p in list(item)
+                           if getattr(p, 'get')('name') == 'AdjgLAC'])
+        self['Tar'] = str([getattr(p, 'text')[10:-10] for p in list(item)
+                           if getattr(p, 'get')('name') == 'TargetCellDN'])
 
     def __setitem__(self, key, item):
         # Quando istanzio la classe managedObject (quella derivata) chiamo,
@@ -79,4 +98,5 @@ class ManagedObject(ManagedObjects):
 
 
 if __name__ == '__main__':
-    get_raw_element_from_xml()
+    # get_raw_element_from_xml()
+    create_xlsx()
