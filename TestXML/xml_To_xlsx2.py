@@ -37,6 +37,7 @@ def main():
         target = ""
         # per tutti i p
         for p in managed_object.findall('{raml20.xsd}p'):
+
             if p.attrib['name'] == "AdjgLAC":
                 lac = p.attrib['name']
                 lac_val = p.text
