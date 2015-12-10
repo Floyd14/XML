@@ -20,7 +20,7 @@ def create_xlsx(filename='./test3.xml',
     my_wb = workbook.active
     my_wb.title = filename[2:-4]
 
-    param = ('Sorgente', 'Destinazione', 'Classe', 'Lac', 'Tar')
+    param = ('Sorgente', 'Destinazione', 'Classe', 'Lac')
 
     root = xml.etree.ElementTree.parse(filename).getroot()[0]
     for elem in root.findall(obj_name):
@@ -61,9 +61,10 @@ class ManagedObject(ManagedObjects):
         # for print the ManagedObject
         a = "Dictionary (id:{}) = ".format(self.name)
         b = "{} -> {}".format(self['Sorgente'], self['Destinazione'])
-        c = "\n\tClasse: {}\n\tLac: {}\n\tTarget: {}".format(self['Classe'], self['Lac'], self['Tar'])
+        c = "\n\tClasse: {}\n\tLac: {}".format(self['Classe'], self['Lac'])
+        d = "\n\tSubzona: {}\n\tSettore: {}\n\tSiteCode: {}".format(self['Subzona'], self['Settore'], self['SiteCode'])
 
-        return a + b + c
+        return a + b + c + d
 
     def __parse(self, item):
         # item è un raw_obj
@@ -76,10 +77,38 @@ class ManagedObject(ManagedObjects):
             self[tag] = getattr(item, method)(attrib)[start:end]
             # print(self[tag])
 
-        self['Lac'] = str([getattr(p, 'text') for p in list(item)
+        lac = str([getattr(p, 'text') for p in list(item)
                            if getattr(p, 'get')('name') == 'AdjgLAC'])
-        self['Tar'] = str([getattr(p, 'text')[10:-10] for p in list(item)
+
+        if len(lac) > 3:
+            self['Lac'] = lac
+        else:
+            self['Tar'] = str([getattr(p, 'text')[10:-10] for p in list(item)
                            if getattr(p, 'get')('name') == 'TargetCellDN'])
+
+            self['Lac'] = self['Tar']
+
+
+        if self['Lac']:
+            self['Subzona'] = self['Lac'][2:-5]
+            self['Settore'] = self['Lac'][6:-2]
+            self['SiteCode'] = self['Lac'][2:-3]
+
+        def _relazione(a):
+
+            if a['Classe'] == 'ADJS':
+                print 'a'
+
+            if a['Classe'] == 'ADJG':
+                print 'b'
+
+            if a['Classe'] == 'ADJI':
+                print 'c'
+
+        _relazione(self)
+
+
+
 
     def __setitem__(self, key, item):
         # Quando istanzio la classe managedObject (quella derivata) chiamo,
@@ -96,7 +125,41 @@ class ManagedObject(ManagedObjects):
         # finito di fare i cambiamenti chiamo il set del padre
         ManagedObjects.__setitem__(self, key, item)
 
+import Tkinter
+import ttk
+def create_gui():
+
+    top = Tkinter.Tk()
+    # Code to add widgets will go here...
+    top.geometry("300x280+300+300")
+    app = Example(top)
+
+    top.mainloop()
+
+
+from PIL import Image, ImageTk
+from Tkinter import Tk, Label, BOTH
+from ttk import Frame, Style
+
+
+class Example(ttk.Frame):
+    def __init__(self, parent):
+        ttk.Frame.__init__(self, parent)
+        self.parent = parent
+        self.initUI()
+
+    def initUI(self):
+        self.parent.title("XML To XLSX")
+        self.pack(fill='both', expand=1)
+
+        canvas = Tkinter.Canvas(self)
+        canvas.create_text(20, 30, anchor=Tkinter.W, font="Purisa",
+            text="Drag and Drop your XML file here")
+
+        canvas.pack(fill=Tkinter.BOTH, expand=1)
+
 
 if __name__ == '__main__':
     # get_raw_element_from_xml()
     create_xlsx()
+    #create_gui()
