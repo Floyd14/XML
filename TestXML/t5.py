@@ -3,27 +3,27 @@
 import xml.etree.ElementTree
 from UserDict import UserDict
 
+
 def test():
     obj_name = "{raml20.xsd}managedObject"
     root = xml.etree.ElementTree.parse('./test1.xml').getroot()[0]
     for elem in root.findall(obj_name):
-        Lac =  [getattr(p, 'text') for p in list(elem)
+        lac = [getattr(p, 'text') for p in list(elem)
                if getattr(p, 'get')('name') == 'AdjgLAC']
-        Tar = [getattr(p, 'text')[10:-10] for p in list(elem)
+        tar = [getattr(p, 'text')[10:-10] for p in list(elem)
                if getattr(p, 'get')('name') == 'TargetCellDN']
-        print Lac, Tar
+        print lac, tar
 
 
 def get_raw_element_from_xml(filename='./test1.xml'):
-
     # Name of the object in xml file
     obj_name = "{raml20.xsd}managedObject"
 
     root = xml.etree.ElementTree.parse(filename).getroot()[0]
     for elem in root.findall(obj_name):
-
         x = ManagedObject(elem)
         print repr(x)
+
 
 class ManagedObjects(UserDict):
     # Classe conteiner #
@@ -33,44 +33,47 @@ class ManagedObjects(UserDict):
     def __init__(self, raw_obj=None):
         UserDict.__init__(self)
         self.name = id(raw_obj)  # -> chiamo self.__setitem__(self, name, id(raw_obj))
-        #self.raw_obj = raw_obj # come lo gestisco ? sto chiamando __init??
-        self['raw_obj'] = raw_obj # -> chamo self.__setitem__(self, 'raw_obj', raw_obj)
+        # self.raw_obj = raw_obj # come lo gestisco ? sto chiamando __init??
+        self['raw_obj'] = raw_obj  # -> chamo self.__setitem__(self, 'raw_obj', raw_obj)
 
 
 class ManagedObject(ManagedObjects):
     # Mappa (è un dictionary) di cosa chiamare:
     # tag : (funzione da chiamare, metodo, nome dell'attributo, inizio e fine dello slice
-    xmlMap = {"Sorgente"    :   ('get',  'name',    0,    7),
-              "Destinazione":   ('get',  'name',   11, None),
-              "Classe"      :   ('get', 'class', None, None),
-              #"AdjgLac"     :   ('attrib',  'name', None, None),
-              #"Target"      :   ('attrib',  'name', None, None)
+    xmlMap = {"Sorgente": ('get', 'name', 0, 7),
+              "Destinazione": ('get', 'name', 11, None),
+              "Classe": ('get', 'class', None, None),
+              # "AdjgLac"     :   ('attrib',  'name', None, None),
+              # "Target"      :   ('attrib',  'name', None, None)
               }
 
-    #objs_name = "{raml20.xsd}managedObject"
+    # objs_name = "{raml20.xsd}managedObject"
 
     def __repr__(self):
         # for print the ManagedObject
 
         a = "{} {} = ".format('Dictionary', self.name)
-        b = "{} -> {}\n{:>31} {}".format(self['Sorgente'], self['Destinazione'],'Classe:', self['Classe'])
-        return a+b
+        b = "{} -> {}".format(self['Sorgente'], self['Destinazione'])
+        c = "\n{} {} {}".format(self['Classe'], self['Lac'], self['Tar'])
+
+        return a + b + c
 
     def __parse(self, item):
-
+        # item è un raw_obj
         self.clear()
-        #root = xml.etree.ElementTree.parse(filename).getroot()[0]
-        #for elem in root.findall(self.objs_name):
 
         for tag, (method, attrib, start, end) in self.xmlMap.items():
             # al primo ciclo vale: "Classe", (<function getattr>, 'class', None, None) -> elem.attrib['class']
             # self['Classe'] = getattr(elem, 'attrib')['class'][None, None]
 
             self[tag] = getattr(item, method)(attrib)[start:end]
-            #print(self[tag])
-            #print(elem)
-            #print(ManagedObject())
-            #print(ManagedObject)
+            # print(self[tag])
+
+        self['Lac'] = [getattr(p, 'text') for p in list(item)
+                       if getattr(p, 'get')('name') == 'AdjgLAC']
+
+        self['Tar'] = [getattr(p, 'text')[10:-10] for p in list(item)
+                       if getattr(p, 'get')('name') == 'TargetCellDN']
 
     def __setitem__(self, key, item):
         # Quando istanzio la classe managedObject (quella derivata) chiamo,
@@ -87,7 +90,7 @@ class ManagedObject(ManagedObjects):
         # finito di fare i cambiamenti chiamo il set del padre
         ManagedObjects.__setitem__(self, key, item)
 
-if __name__ == '__main__':
 
+if __name__ == '__main__':
     get_raw_element_from_xml()
-    #test()
+    # test()
