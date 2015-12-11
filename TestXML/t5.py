@@ -241,6 +241,6 @@ class Example(ttk.Frame):
 
 
 if __name__ == '__main__':
-    get_raw_element_from_xml()
-    #create_xlsx()
+    #get_raw_element_from_xml()
+    create_xlsx()
     # create_gui()
