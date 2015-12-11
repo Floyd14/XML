@@ -4,6 +4,11 @@ import xml.etree.ElementTree
 import openpyxl
 from UserDict import UserDict
 
+import re
+
+import Tkinter
+import ttk
+
 
 def get_raw_element_from_xml(filename='./test3.xml',
                              obj_name="{raml20.xsd}managedObject"):
@@ -16,18 +21,27 @@ def get_raw_element_from_xml(filename='./test3.xml',
 def create_xlsx(filename='./test3.xml',
                 obj_name="{raml20.xsd}managedObject",
                 dest_filename='xmlTest3.xlsx'):
+
+    data = []
+
     workbook = openpyxl.Workbook()
     my_wb = workbook.active
     my_wb.title = filename[2:-4]
 
-    param = ('Sorgente', 'Destinazione', 'Classe', 'Lac')
+    param = ('Sorgente', 'SSubzona', 'SSiteCode', 'SSettore',
+             'Destinazione', 'DSubzona', 'DSiteCode', 'DSettore',
+             'Classe', 'Lac', 'Relazione', 'Protocollo')
 
     root = xml.etree.ElementTree.parse(filename).getroot()[0]
     for elem in root.findall(obj_name):
         x = ManagedObject(elem)
         print x
         raw = [x[par] for par in list(param)]
+        data.append(raw)
         my_wb.append(raw)
+
+    for raw in data:
+        print raw
 
     # Save the file
     workbook.save(filename=dest_filename)
@@ -51,64 +65,90 @@ class ManagedObject(ManagedObjects):
     xmlMap = {"Sorgente": ('get', 'name', 0, 7),
               "Destinazione": ('get', 'name', 11, None),
               "Classe": ('get', 'class', None, None),
-              # "AdjgLac"     :   ('attrib',  'name', None, None),
-              # "Target"      :   ('attrib',  'name', None, None)
+              "Target": ('get', 'distName', None, None)
               }
 
     # objs_name = "{raml20.xsd}managedObject"
 
     def __repr__(self):
         # for print the ManagedObject
-        a = "Dictionary (id:{}) = ".format(self.name)
-        b = "{} -> {}".format(self['Sorgente'], self['Destinazione'])
-        c = "\n\tClasse: {}\n\tLac: {}".format(self['Classe'], self['Lac'])
-        d = "\n\tSubzona:    {} -> {}" \
-            "\n\tSettore:     {} -> {}" \
-            "\n\tSiteCode: {} -> {}".format(self['SSubzona'], self['DSubzona'],
-                                            self['SSettore'], self['DSettore'],
-                                            self['SSiteCode'], self['DSiteCode'])
-        e = "\n{}, Protocollo: {}\n".format(self['Relazione'], self['Protocollo'])
+        try:
+            a = "Dictionary (id:{}) = ".format(self.name)
+            b = "{} -> {}".format(self['Sorgente'], self['Destinazione'])
+            c = "\n\tClasse: {}\n\tLac: {}".format(self['Classe'], self['Lac'])
+            d = "\n\tSubzona:    {} -> {}" \
+                "\n\tSettore:     {} -> {}" \
+                "\n\tSiteCode: {} -> {}".format(self['SSubzona'], self['DSubzona'],
+                                                self['SSettore'], self['DSettore'],
+                                                self['SSiteCode'], self['DSiteCode'])
+            e = "\n{}, Protocollo: {}\n".format(self['Relazione'], self['Protocollo'])
 
-        return a + b + c + d + e
+            return a + b + c + d + e
+
+        except KeyError:
+            pass
 
     def __parse(self, item):
         # item è un raw_obj
         self.clear()
 
+        # inizializzo le chuiavi
+        keys = ('Sorgente', 'Destinazione', 'Classe', 'Lac', 'Target', 'RNC',
+                'SSubzona', 'SSiteCode', 'SSettore',
+                'DSubzona', 'DSiteCode', 'DSettore',
+                'Relazione', 'Protocollo')
+
+        for key in keys:
+            self[key] = 0
+
+        # Definisco Sorgente, Destinazione e Classe
         for tag, (method, attrib, start, end) in self.xmlMap.items():
             # al primo ciclo vale: "Classe", (<function getattr>, 'class', None, None) -> elem.attrib['class']
             # self['Classe'] = getattr(elem, 'attrib')['class'][None, None]
-
             self[tag] = getattr(item, method)(attrib)[start:end]
             # print(self[tag])
 
-        # Prendo la LAC
-        if self['Classe'] == 'ADJG':
-            self['Lac'] = str([getattr(p, 'text') for p in list(item)
-                               if getattr(p, 'get')('name') == 'AdjgLAC'])
-
-        else:
-            self['Target'] = str([getattr(p, 'text')[10:-21] for p in list(item)
-                                  if getattr(p, 'get')('name') == 'TargetCellDN'])
-
-            self['Lac'] = self['Target']
-
         self['SSubzona'] = self['Sorgente'][:2]
-        self['SSiteCode'] = self['Sorgente'][2:-1]
-        self['SSettore'] = self['Sorgente'][-1:]
+        self['SSiteCode'] = int(self['Sorgente'][2:-1])
+        self['SSettore'] = int(self['Sorgente'][-1:])
 
         self['DSubzona'] = self['Destinazione'][:2]
-        self['DSiteCode'] = self['Destinazione'][2:-1]
-        self['DSettore'] = self['Destinazione'][-1:]
+        self['DSiteCode'] = int(self['Destinazione'][2:-1])
+        self['DSettore'] = int(self['Destinazione'][-1:])
 
-        carrier1 = ('1', '4', '7')
-        carrier2 = ('2', '5', '8')
-        carrier3 = ('3', '6', '9')
+        # Prendo l'RNC
+        pattern = re.compile(r"(D*)(RNC-)(\d{3}|\d{2})(D*)")
+        rnc = re.search(pattern, str(self['Target']))
+        self['RNC'] = rnc.group(3)
+
+        # Prendo la LAC
+        if self['Classe'] == 'ADJG':
+            self['Lac'] = int([getattr(p, 'text') for p in list(item)
+                               if getattr(p, 'get')('name') == 'AdjgLAC'][0])
+
+
+        elif self['Classe'] == 'ADJI':
+
+            self['Lac'] = '(RNC) {}'.format(self['RNC'])
+
+        elif self['Classe'] == 'ADJL':
+            self['Lac'] =  '(RNC) {}'.format(self['RNC'])
+
+        else:
+            self['Lac'] = '(RNC) {}'.format(self['RNC'])
+
+        carrier1 = (1, 4, 7)
+        carrier2 = (2, 5, 8)
+        carrier3 = (3, 6, 9)
+
+        gsm = (1, 2, 3)
+        dcs = (7, 8, 9)
 
         rel1 = '3G <-> 3G (stessa carrier)'
         rel2 = '3G <-> 3G (diversa carrier)'
         rel3 = '3G -> 2G'
 
+        # ADJS
         if self['Classe'] == 'ADJS':
             self['Relazione'] = rel1
 
@@ -118,17 +158,46 @@ class ManagedObject(ManagedObjects):
             else:
                 self['Protocollo'] = 'ADJS_OPI_ F3'
 
-        if self['Classe'] == 'ADJG':
+        # ADJG
+        elif self['Classe'] == 'ADJG':
             self['Relazione'] = rel3
-            self['Protocollo'] = '??'
 
-        if self['Classe'] == 'ADJI':
+            if self['DSettore'] in gsm:
+                self['Relazione'] = rel3 + ' GSM'
+                self['Protocollo'] = 'DEFAULT'
+
+            elif self['DSettore'] in dcs:
+                self['Relazione'] = rel3 + ' DCS'
+                self['Protocollo'] = 'ADJG1900_OPI'
+
+        # ADJI
+        elif self['Classe'] == 'ADJI':
             self['Relazione'] = rel2
-            self['Protocollo'] = '??'
 
-        else:
-            self['Relazione'] = '?'
-            self['Protocollo'] = '??'
+            if self['SSettore'] in carrier1:
+
+                if self['DSettore'] in carrier2:
+                    self['Protocollo'] = 'ADGJ_OPI_RC_F1_F2'
+                elif self['DSettore'] in carrier3:
+                    self['Protocollo'] = 'ADGJ_OPI_RC_F1_F3'
+
+            elif self['SSettore'] in carrier2:
+
+                if self['DSettore'] in carrier1:
+                    self['Protocollo'] = 'ADGJ_OPI_RC_F2_F1'
+                elif self['DSettore'] in carrier3:
+                    self['Protocollo'] = 'ADGJ_OPI_RC_F2_F3'
+
+            elif self['SSettore'] in carrier3:
+
+                if self['DSettore'] in carrier1:
+                    self['Protocollo'] = 'ADGJ_OPI_RC_F3_F1'
+                elif self['DSettore'] in carrier2:
+                    self['Protocollo'] = 'ADGJ_OPI_RC_F3_F2'
+
+        # ADJL
+        elif self['Classe'] == 'ADJL':
+            self['Relazione'] = 'DA IMPLEMENTARE'
 
     def __setitem__(self, key, item):
         # Quando istanzio la classe managedObject (quella derivata) chiamo,
@@ -146,10 +215,6 @@ class ManagedObject(ManagedObjects):
         ManagedObjects.__setitem__(self, key, item)
 
 
-import Tkinter
-import ttk
-
-
 def create_gui():
     top = Tkinter.Tk()
     # Code to add widgets will go here...
@@ -157,12 +222,6 @@ def create_gui():
     app = Example(top)
 
     top.mainloop()
-
-
-from PIL import Image, ImageTk
-from Tkinter import Tk, Label, BOTH
-from ttk import Frame, Style
-
 
 class Example(ttk.Frame):
     def __init__(self, parent):
@@ -182,6 +241,6 @@ class Example(ttk.Frame):
 
 
 if __name__ == '__main__':
-    # get_raw_element_from_xml()
-    create_xlsx()
+    get_raw_element_from_xml()
+    #create_xlsx()
     # create_gui()
